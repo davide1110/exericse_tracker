@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2 class="header-text">Exercise Tracker</h2>
+    <div class="user-form">
+        <h3 class="header-text">Save User</h3>
+        <form action="/api/Users" method="post">
+            <input type="text" name="username" id="username" placeholder="username">
+            <button type="submit">Send</button>
+        </form>
+
+    </div>
+    <div class="exercise-form">
+        <h3 class="header-text">Save a new exercise</h3>
+        <form action="/api/users/1/exercises" method="post">
+            <input type="text" name="id" id="id" placeholder="_id">
+            <input type="text" name="description" id="description" placeholder="description">
+            <input type="text" name="duration" id="duration" placeholder="duration">
+            <input type="date" name="date" id="date" placeholder="date">
+            <button type="submit">Save exercise</button>
+        </form>
+    </div>
+</body>
+</html>

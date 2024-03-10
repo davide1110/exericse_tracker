@@ -1,0 +1,58 @@
+/*    font-family: 'RecoletaSemiBold','Roboto',Helvetica,sans-serif;
+*/
+body {
+    background-color:#dbf0d1;
+}
+* {
+    font-family:'Roboto',Helvetica,sans-serif;
+}
+
+button {
+    border: 1px solid white;
+    background-color: white;
+    color: green;
+    cursor: pointer;
+}
+
+.user-form {
+    border: solid 3px white;
+    border-radius: 10px;
+    padding: 10px;
+}
+.user-form > form {
+    text-align: center;   
+}
+
+.user-form > form > input {
+    border-radius: 5px;
+    border: 1px solid white;
+}
+.user-form > form > button {
+    margin-top: 5px;
+}
+
+.exercise-form {
+    margin-top:5px;
+    border: 3px solid white;
+    border-radius: 10px;
+}
+.exercise-form  > form{
+  text-align: center;    
+}
+.exercise-form > form > input {
+    display: block;
+    text-align: center;
+    align-content: center;
+    margin: 4px auto;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid white;
+}
+.header-text{
+    text-align: center;
+}
+input:active{
+    border:1px solid red !important;
+    border-color: forestgreen;
+}
+

@@ -10,7 +10,11 @@ const User = UserSchema.User;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+app.use(express.static("public"))
 
+app.get('/', (req,res) => {
+  res.sendFile(`${__dirname}/views/index.html`);
+})
 app.listen(3000, () => console.log('Server listening to 3000 port'));
 mongoose.connect(process.env.MONGODBURL, {}).then(
   console.log('Successfully connected to mongodb')
