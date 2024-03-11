@@ -12,6 +12,7 @@ button {
     background-color: white;
     color: green;
     cursor: pointer;
+    border-radius: 6px;
 }
 
 .user-form {
@@ -23,10 +24,7 @@ button {
     text-align: center;   
 }
 
-.user-form > form > input {
-    border-radius: 5px;
-    border: 1px solid white;
-}
+
 .user-form > form > button {
     margin-top: 5px;
 }
@@ -41,18 +39,16 @@ button {
 }
 .exercise-form > form > input {
     display: block;
-    text-align: center;
     align-content: center;
     margin: 4px auto;
     padding: 5px;
-    border-radius: 5px;
-    border: 1px solid white;
 }
 .header-text{
     text-align: center;
 }
-input:active{
-    border:1px solid red !important;
-    border-color: forestgreen;
+input {
+    border-radius: 5px;
+    border: 1px solid white;
+    outline: none;
+    text-align: center;
 }
-
