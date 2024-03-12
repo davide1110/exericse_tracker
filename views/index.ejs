@@ -10,8 +10,8 @@
     <h2 class="header-text">Exercise Tracker</h2>
     <div class="user-form">
         <h3 class="header-text">Save User</h3>
-        <form action="/api/Users" method="post">
-            <input type="text" name="username" id="username" placeholder="username" required>
+        <form action="/api/users" method="post">
+            <input type="text" name="username" id="username" placeholder="username">
             <button type="submit">Send</button>
         </form>
 
@@ -28,7 +28,8 @@
     </div>
     <div class="log-info">
         <h3 class="header-text">Log info</h3>
-        <p>Do you want to see your log info?</p>
+        <p>Do you want to see your log info? <a href="/api/users/log?">Check it out</a></p>
+        
     </div>
 </body>
 </html>
