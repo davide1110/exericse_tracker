@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const UserSchema = require('./schema/user.js');
 const User = UserSchema.User;
-
+app.use(cors({ optionsSuccessStatus: 200 }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -36,18 +36,37 @@ app.post('/api/users', (req, res) => {
     });
 });
 
+app.delete('/api/users', (req,res) => {
+  User.deleteMany().then(result => res.json({result}));
+})
+
+app.get('/api/users', (req, res) => {
+  User.find().then(users => {
+   // console.log(typeof users.values())
+    let json = {"pippo": "a"};
+    let pippo = ["s"];
+    console.log(typeof pippo)
+    //Object.keys(users).forEach(key => console.log(key));
+    //console.log("user keys: " + users)
+   // console.log(`pippo: ${users}`);
+    res.json({users})
+    //res.se
+  }).catch(error =>  {console.error(error); res.json({error})});
+})
+
 
 app.post('/api/users/:id/exercises', (req, res) => {
   const body = req.body;
-  const id = req.params.id !== "1" ? req.params.id : body.id;
+  const id = req.params.id !== 1 ? req.params.id : body.id;
   User.findById(id).then(foundUser => {
+    let count = foundUser.count + 1;
     let logs = foundUser.log === undefined ? [] : foundUser.log;
     logs.push({
       description: body.description,
       duration: body.duration,
       date: body.date
      });
-    User.findByIdAndUpdate(foundUser._id, {log: logs}).then(user => res.json({user}))
+    User.findByIdAndUpdate(foundUser._id, {count: count},{log: logs}).then(user => res.json({user}))
     .catch(error => res.json({error}));
   })
    //console.log(user);
@@ -123,4 +142,3 @@ function getCriteriaQuery(id, queryParams) {
 
 }
 
-app.use(cors({ optionsSuccessStatus: 200 }));
