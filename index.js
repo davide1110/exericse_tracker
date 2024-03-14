@@ -42,14 +42,9 @@ app.delete('/api/users', (req,res) => {
 
 app.get('/api/users', (req, res) => {
   User.find().then(users => {
-   // console.log(typeof users.values())
-    let json = {"pippo": "a"};
-    let pippo = ["s"];
-    console.log(typeof pippo)
-    //Object.keys(users).forEach(key => console.log(key));
-    //console.log("user keys: " + users)
-   // console.log(`pippo: ${users}`);
-    res.json({users})
+    let returnedUsers = [];
+    users.forEach(user => returnedUsers.push({_id: user._id, username: user.username}));
+    res.json({users: returnedUsers})
     //res.se
   }).catch(error =>  {console.error(error); res.json({error})});
 })
@@ -57,7 +52,7 @@ app.get('/api/users', (req, res) => {
 
 app.post('/api/users/:id/exercises', (req, res) => {
   const body = req.body;
-  const id = req.params.id !== 1 ? req.params.id : body.id;
+  const id = req.params.id !== "1" ? req.params.id : body.id;
   User.findById(id).then(foundUser => {
     let count = foundUser.count + 1;
     let logs = foundUser.log === undefined ? [] : foundUser.log;
@@ -110,10 +105,13 @@ app.get('/api/users/:id/logs?', (req, res) => {
   let query = getCriteriaQuery(id, req.query);
 
   query.then(user => {
+    if(user === null) {
+      res.json({error: `No user found with id ${id}`});
+      return;
+    }
     console.log(`found user : ${user}`);
     res.json({ user });
   }).catch(error => {
-    console.log(`No user found with id ${id}`);
     res.json({ error: error });
   });
 });
@@ -135,7 +133,7 @@ function getCriteriaQuery(id, queryParams) {
   if (Object.values(queryParams).length === 0) {
     return query;
   }
-  console.log(`use of optional parameters: ${queryParams}`);
+  console.log(`use of optional parameters: ${queryParams.from}, ${queryParams.to}, ${queryParams.limit}`);
   return query.where("log.date", queryParams.from)
     .where("log.date", queryParams.to).limit(queryParams.limit);
 
