@@ -41,10 +41,10 @@ app.delete('/api/users', (req,res) => {
 })
 
 app.get('/api/users', (req, res) => {
-  User.find().then(users => {
+  User.find().select("username").select("id").exec().then(users => {
     let returnedUsers = [];
-    users.forEach(user => returnedUsers.push({_id: user._id, username: user.username}));
-    res.json({users: returnedUsers})
+  //  users.forEach(user => returnedUsers.push({_id: user._id, username: user.username}));
+    res.json(users)
     //res.se
   }).catch(error =>  {console.error(error); res.json({error})});
 })
@@ -54,14 +54,27 @@ app.post('/api/users/:id/exercises', (req, res) => {
   const body = req.body;
   const id = req.params.id !== "1" ? req.params.id : body.id;
   User.findById(id).then(foundUser => {
+    if(foundUser === null){
+      return;
+    }
     let count = foundUser.count + 1;
-    let logs = foundUser.log === undefined ? [] : foundUser.log;
+    let logs = foundUser.log === undefined ? [] : foundUser.log;//sv-SE
+    const date =  body.date !== undefined ? body.date : new Intl.DateTimeFormat('sv-SE').format(new Date());
     logs.push({
       description: body.description,
       duration: body.duration,
-      date: body.date
+      date: date
      });
-    User.findByIdAndUpdate(foundUser._id, {count: count},{log: logs}).then(user => res.json({user}))
+    User.findByIdAndUpdate(foundUser._id, {count: count,log: logs}, {new: true}).then(user => {
+     const log = user.log[user.log.length -1];
+      res.json({
+        username: user.username,
+        description: log.description,
+        duration: log.duration,
+        date: log.date,
+        _id: user._id
+      })
+    })
     .catch(error => res.json({error}));
   })
    //console.log(user);
@@ -100,17 +113,30 @@ app.post('/api/users/:id/exercises', (req, res) => {
     });*/
 });
 
-app.get('/api/users/:id/logs?', (req, res) => {
+app.get('/api/users/:id/logs', (req, res) => {
   const id = req.params.id.toString();
   let query = getCriteriaQuery(id, req.query);
 
-  query.then(user => {
+  query.exec().then(user => {
     if(user === null) {
       res.json({error: `No user found with id ${id}`});
       return;
     }
     console.log(`found user : ${user}`);
-    res.json({ user });
+    /*if(user.log !== undefined && user.log.length > 0) {
+      let logs = user.log;
+      logs.forEach(el => {
+        
+        el.date = el.date.toDateString();
+        console.log("eel: " + el)
+        console.log("daate:" + el.date);
+        console.log("daate1:" + el.date.toDateString());
+      })
+      user.log = logs;
+      console.log("logs:" + logs);
+    }
+    */
+    res.json( user);
   }).catch(error => {
     res.json({ error: error });
   });
@@ -131,12 +157,20 @@ User.find().then(users => {
 function getCriteriaQuery(id, queryParams) {
   let query = User.findById(id);
   if (Object.values(queryParams).length === 0) {
-    return query;
+    return query.select("username").select("count").select("log.description").select("log.duration").select("log.date");
   }
   console.log(`use of optional parameters: ${queryParams.from}, ${queryParams.to}, ${queryParams.limit}`);
-  return query.where("log.date", queryParams.from)
-    .where("log.date", queryParams.to).limit(queryParams.limit);
-
+  if(queryParams.from !== undefined) {
+    query = query.where("log.date", queryParams.from);
+  }
+  if(queryParams.to !== undefined) {
+   query = query.where("log.date", queryParams.to);
+  }
+  if(queryParams.limit !== undefined) {
+    query = query.where("count", queryParams.limit);
+  }
+  return query.select("username").select("count").select("_id").select("log");
+ 
 
 }
 
