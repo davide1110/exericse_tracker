@@ -59,7 +59,7 @@ app.post('/api/users/:id/exercises', (req, res) => {
     }
     let count = foundUser.count + 1;
     let logs = foundUser.log === undefined ? [] : foundUser.log;//sv-SE
-    const date =  body.date !== undefined ? body.date : new Intl.DateTimeFormat('sv-SE').format(new Date());
+    const date =  body.date !== undefined ? new Date(body.date) : new Intl.DateTimeFormat('sv-SE').format(new Date());
     logs.push({
       description: body.description,
       duration: body.duration,
@@ -71,7 +71,7 @@ app.post('/api/users/:id/exercises', (req, res) => {
         username: user.username,
         description: log.description,
         duration: log.duration,
-        date: log.date,
+        date: new Date(log.date).toDateString(),
         _id: user._id
       })
     })
@@ -123,19 +123,16 @@ app.get('/api/users/:id/logs', (req, res) => {
       return;
     }
     console.log(`found user : ${user}`);
-    /*if(user.log !== undefined && user.log.length > 0) {
+    if(user.log !== undefined && user.log.length > 0) {
       let logs = user.log;
       logs.forEach(el => {
         
-        el.date = el.date.toDateString();
-        console.log("eel: " + el)
-        console.log("daate:" + el.date);
-        console.log("daate1:" + el.date.toDateString());
+        el.date = new Date(el.date).toDateString();
       })
-      user.log = logs;
+     // user.log = logs;
       console.log("logs:" + logs);
     }
-    */
+    
     res.json( user);
   }).catch(error => {
     res.json({ error: error });
@@ -164,10 +161,14 @@ function getCriteriaQuery(id, queryParams) {
     query = query.where("log.date", queryParams.from);
   }
   if(queryParams.to !== undefined) {
-   query = query.where("log.date", queryParams.to);
+    //query.where({})
+  //query = query.where("log.date", ">", queryParams.to);
+   //query =  User.find( {id:id, "log.date" : {$lt:new Date(queryParams.to)}});
+
   }
   if(queryParams.limit !== undefined) {
-    query = query.where("count", queryParams.limit);
+  //  query = query.where("count", queryParams.limit);
+    query = query.where({count : {$lte: 3}});
   }
   return query.select("username").select("count").select("_id").select("log");
  
