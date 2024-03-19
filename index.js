@@ -124,15 +124,33 @@ app.get('/api/users/:id/logs', (req, res) => {
     }
     console.log(`found user : ${user}`);
     if(user.log !== undefined && user.log.length > 0) {
+      
       let logs = user.log;
+      /*if(req.query.limit !== undefined) {
+        console.log('use of limit' + req.query.limit);
+       logs = logs.slice(logs.length - parseInt(req.query.limit));
+       console.log(logs);
+      }
+      if(req.query.to !== undefined) {
+        console.log('use of to' + req.query.to);
+       logs = logs.filter(log => new Date(log.date) >= new Date(req.query.to))
+       console.log(logs);
+      }
+      if(req.query.from !== undefined) {
+        console.log('use of from' + req.query.from);
+        logs = logs.filter(log => new Date(log.date) <= new Date(req.query.from))
+        console.log(logs);
+      }*/
       logs.forEach(el => {
         
         el.date = new Date(el.date).toDateString();
       })
      // user.log = logs;
       console.log("logs:" + logs);
+      //user.log = logs;
+      //user.count = logs.length;
     }
-    
+    //use user.logs.length to return count
     res.json( user);
   }).catch(error => {
     res.json({ error: error });
@@ -153,24 +171,38 @@ User.find().then(users => {
 //TODO: Dettaglio con i logs
 function getCriteriaQuery(id, queryParams) {
   let query = User.findById(id);
+  
+ //let query = User.find();
   if (Object.values(queryParams).length === 0) {
-    return query.select("username").select("count").select("log.description").select("log.duration").select("log.date");
+   return query.select("username").select("count").select("log.description").select("log.duration").select("log.date");
   }
   console.log(`use of optional parameters: ${queryParams.from}, ${queryParams.to}, ${queryParams.limit}`);
-  if(queryParams.from !== undefined) {
-    query = query.where("log.date", queryParams.from);
-  }
+ /* if(queryParams.from !== undefined) {
+    query = query.select("log").where({"log.date": {$gte:queryParams.from}});
+
+   // query = query.where("log.date", queryParams.from);
+  }*/
+  
   if(queryParams.to !== undefined) {
     //query.where({})
   //query = query.where("log.date", ">", queryParams.to);
    //query =  User.find( {id:id, "log.date" : {$lt:new Date(queryParams.to)}});
+  let to = new Intl.DateTimeFormat('sv-SE').format(new Date(queryParams.to));
+ //return query.select("log").where({"log.date": {$lte: "2024-03-07"}});
+ return User.aggregate([{
+  $unwind: '$log'
+},{$match:{"log.date": {$gte:"2024-03-08"}}}])
 
   }
+  /*
   if(queryParams.limit !== undefined) {
   //  query = query.where("count", queryParams.limit);
-    query = query.where({count : {$lte: 3}});
-  }
-  return query.select("username").select("count").select("_id").select("log");
+   console.log(`use of limit param: ${queryParams.limit}`);
+   query = query.select("log.description")
+  }*/
+  //return query;
+  // return query.select("log").where({"log.date": {$gte: new Date(2024,2,13)}});
+  return query.select("username").select("count").select("_id").select("log.description").select("log.duration").select("log.date");
  
 
 }
