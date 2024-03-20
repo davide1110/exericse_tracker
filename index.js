@@ -42,10 +42,7 @@ app.delete('/api/users', (req,res) => {
 
 app.get('/api/users', (req, res) => {
   User.find().select("username").select("id").exec().then(users => {
-    let returnedUsers = [];
-  //  users.forEach(user => returnedUsers.push({_id: user._id, username: user.username}));
     res.json(users)
-    //res.se
   }).catch(error =>  {console.error(error); res.json({error})});
 })
 
@@ -115,9 +112,8 @@ app.post('/api/users/:id/exercises', (req, res) => {
 
 app.get('/api/users/:id/logs', (req, res) => {
   const id = req.params.id.toString();
-  let query = getCriteriaQuery(id, req.query);
-
-  query.exec().then(user => {
+  
+  User.findById(id).then(user => {
     if(user === null) {
       res.json({error: `No user found with id ${id}`});
       return;
@@ -126,29 +122,29 @@ app.get('/api/users/:id/logs', (req, res) => {
     if(user.log !== undefined && user.log.length > 0) {
       
       let logs = user.log;
-      /*if(req.query.limit !== undefined) {
+      if(req.query.limit !== undefined) {
         console.log('use of limit' + req.query.limit);
        logs = logs.slice(logs.length - parseInt(req.query.limit));
        console.log(logs);
       }
       if(req.query.to !== undefined) {
         console.log('use of to' + req.query.to);
-       logs = logs.filter(log => new Date(log.date) >= new Date(req.query.to))
+       logs = logs.filter(log => new Date(log.date) <= new Date(req.query.to))
        console.log(logs);
       }
       if(req.query.from !== undefined) {
         console.log('use of from' + req.query.from);
-        logs = logs.filter(log => new Date(log.date) <= new Date(req.query.from))
+        logs = logs.filter(log => new Date(log.date) >= new Date(req.query.from))
         console.log(logs);
-      }*/
+      }
       logs.forEach(el => {
         
         el.date = new Date(el.date).toDateString();
       })
      // user.log = logs;
       console.log("logs:" + logs);
-      //user.log = logs;
-      //user.count = logs.length;
+      user.log = logs;
+      user.count = logs.length;
     }
     //use user.logs.length to return count
     res.json( user);
@@ -156,26 +152,15 @@ app.get('/api/users/:id/logs', (req, res) => {
     res.json({ error: error });
   });
 });
-/*app.get('/api/users/logs?', (req, res) => {
-  //const id = req.params.id.toString();
-  //let query = getCriteriaQuery(id, req.query);
-  let usersList;
-User.find().then(users => {
-    res.render("log", {users: users});
-  }).catch(error => {
-    console.log(`No users found`);
-    res.json({ error: error });
-  });
-});*/
 //TODO: TABELLA con dati principali
 //TODO: Dettaglio con i logs
 function getCriteriaQuery(id, queryParams) {
   let query = User.findById(id);
   
  //let query = User.find();
-  if (Object.values(queryParams).length === 0) {
+  /*if (Object.values(queryParams).length === 0) {
    return query.select("username").select("count").select("log.description").select("log.duration").select("log.date");
-  }
+  }*/
   console.log(`use of optional parameters: ${queryParams.from}, ${queryParams.to}, ${queryParams.limit}`);
  /* if(queryParams.from !== undefined) {
     query = query.select("log").where({"log.date": {$gte:queryParams.from}});
@@ -184,16 +169,27 @@ function getCriteriaQuery(id, queryParams) {
   }*/
   
   if(queryParams.to !== undefined) {
+  }
     //query.where({})
   //query = query.where("log.date", ">", queryParams.to);
    //query =  User.find( {id:id, "log.date" : {$lt:new Date(queryParams.to)}});
-  let to = new Intl.DateTimeFormat('sv-SE').format(new Date(queryParams.to));
- //return query.select("log").where({"log.date": {$lte: "2024-03-07"}});
- return User.aggregate([{
-  $unwind: '$log'
-},{$match:{"log.date": {$gte:"2024-03-08"}}}])
+ // let to = new Intl.DateTimeFormat('sv-SE').format(new Date(queryParams.to));
+  let from = new Intl.DateTimeFormat('sv-SE').format(new Date(queryParams.from));
 
-  }
+ //return query.select("log").where({"log.date": {$lte: "2024-03-07"}});
+ //ObjectId
+ /*
+ListModel.aggregate(
+    { $match: {_id: ObjectId("57e6bcab6b383120f0395aed")}},
+    { $unwind: '$recipients'},
+    { $match: {'recipients.status':1}})
+ */
+ /*return User.aggregate({$match: { $expr : { $eq: [ '$_id' , { $toObjectId: id } ]  } }},
+ {$unwind: "$log"},{$match:{"log.date":{$gte: from}}});*/
+
+ 
+
+  
   /*
   if(queryParams.limit !== undefined) {
   //  query = query.where("count", queryParams.limit);
@@ -202,8 +198,8 @@ function getCriteriaQuery(id, queryParams) {
   }*/
   //return query;
   // return query.select("log").where({"log.date": {$gte: new Date(2024,2,13)}});
-  return query.select("username").select("count").select("_id").select("log.description").select("log.duration").select("log.date");
+ // return query.select("username").select("count").select("_id").select("log.description").select("log.duration").select("log.date");
  
-
+  
 }
 
