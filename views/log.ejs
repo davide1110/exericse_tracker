@@ -14,12 +14,12 @@
             <th>Date</th>
         </thead>
         <tbody>
-            <% for (let i = 0; i < users.length; i++){%>
+            <%= logs.length %>
+            <% for (let i = 0; i < logs.length; i++){%>
             <tr>
-               <td><%= users[i].username %></td>
-               <td><%= users[i].description %></td>
-               <td><%= users[i].username %></td>
-               <td><%= users[i].description %></td>
+               <td><%= logs[i]%></td>
+               <td><%= logs[i].duration %></td>
+               <td><%= logs[i].description %></td>
             </tr>
             <% } %>
         </tbody>

@@ -55,7 +55,7 @@ app.post('/api/users/:id/exercises', (req, res) => {
       return;
     }
     let count = foundUser.count + 1;
-    let logs = foundUser.log === undefined ? [] : foundUser.log;//sv-SE
+    let logs = foundUser.log === undefined ? [] : foundUser.log;
     const date =  body.date !== undefined ? new Date(body.date) : new Intl.DateTimeFormat('sv-SE').format(new Date());
     logs.push({
       description: body.description,
@@ -74,40 +74,6 @@ app.post('/api/users/:id/exercises', (req, res) => {
     })
     .catch(error => res.json({error}));
   })
-   //console.log(user);
-  //handle better logs array
- // User.findByIdAndUpdate(id, )
- /* 
-  console.log(id);
-  User.findById(id).then(foundUser => {
-    console.log(foundUser)
-    console.log("useeeer: " + foundUser);
-    const logs = foundUser.log !== undefined ? foundUser.log : [];
-    console.log("logs:" + logs)
-    logs.push({
-      duration: body.duration,
-      description: body.description,
-      date: body.date
-    });
-    User.updateOne({_id: id}, {log: logs}, {new}).then(updatedUser => res.json(updatedUser));
-  });
-});*/
-
- /* User.findOneAndUpdate({ _id: id }, {
-    logs
-  })
-    .then(savedUser => {
-      console.log(`New Exercise created ${savedUser}`);
-      const log = savedUser.log[0];
-      res.json({
-        _id: savedUser._id, username: savedUser.username, date: log.date,
-        duration: log.duration, description: log.description
-      });
-    })
-    .catch(error => {
-      console.error(`Encountered error while creating a new exercise ${error}`)
-      res.json({ error: error });
-    });*/
 });
 
 app.get('/api/users/:id/logs', (req, res) => {
@@ -121,27 +87,9 @@ app.get('/api/users/:id/logs', (req, res) => {
     console.log(`found user : ${user}`);
     if(user.log !== undefined && user.log.length > 0) {
       
-      let logs = user.log;
-      if(req.query.limit !== undefined) {
-        console.log('use of limit' + req.query.limit);
-       logs = logs.slice(logs.length - parseInt(req.query.limit));
-       console.log(logs);
-      }
-      if(req.query.to !== undefined) {
-        console.log('use of to' + req.query.to);
-       logs = logs.filter(log => new Date(log.date) <= new Date(req.query.to))
-       console.log(logs);
-      }
-      if(req.query.from !== undefined) {
-        console.log('use of from' + req.query.from);
-        logs = logs.filter(log => new Date(log.date) >= new Date(req.query.from))
-        console.log(logs);
-      }
-      logs.forEach(el => {
-        
-        el.date = new Date(el.date).toDateString();
-      })
-     // user.log = logs;
+      let logs = filterLogsByParams(user.log, req.query);
+      logs = formatLogsDate(logs);
+    
       console.log("logs:" + logs);
       user.log = logs;
       user.count = logs.length;
@@ -152,54 +100,58 @@ app.get('/api/users/:id/logs', (req, res) => {
     res.json({ error: error });
   });
 });
+
+
+
+function filterLogsByParams(logs, queryParams) {
+  if(queryParams.limit !== undefined) {
+    console.log('use of limit' + queryParams.limit);
+   logs = logs.slice(logs.length - parseInt(queryParams.limit));
+   console.log(logs);
+  }
+  if(queryParams.to !== undefined) {
+    console.log('use of to' + queryParams.to);
+   logs = logs.filter(log => new Date(log.date) <= new Date(queryParams.to))
+   console.log(logs);
+  }
+  if(queryParams.from !== undefined) {
+    console.log('use of from' + queryParams.from);
+    logs = logs.filter(log => new Date(log.date) >= new Date(queryParams.from))
+    console.log(logs);
+  }
+  return logs;
+
+}
+function formatLogsDate(logs) {
+  logs.forEach(el => {
+        
+    el.date = new Date(el.date).toDateString();
+  })
+  return logs;
+}
+app.get('/api/users/logs', (req, res) => {
+//  const id = req.params.id.toString();
+  
+  User.find().select("log.description").exec().then(logs => {
+    console.log("looooogs: " + logs);
+    if(logs.length === 0) {
+      res.json({error: `No logs available`});
+      return;
+    }
+  
+      
+   //   let logs = filterLogsByParams(logs, req.query);
+      //logs = formatLogsDate(logs);
+    
+      console.log("logs:" + logs[0]);
+   
+    
+    //use user.logs.length to return count
+    res.render("log", {logs});
+  }).catch(error => {
+    res.json({ error: error });
+  });
+});
 //TODO: TABELLA con dati principali
 //TODO: Dettaglio con i logs
-function getCriteriaQuery(id, queryParams) {
-  let query = User.findById(id);
-  
- //let query = User.find();
-  /*if (Object.values(queryParams).length === 0) {
-   return query.select("username").select("count").select("log.description").select("log.duration").select("log.date");
-  }*/
-  console.log(`use of optional parameters: ${queryParams.from}, ${queryParams.to}, ${queryParams.limit}`);
- /* if(queryParams.from !== undefined) {
-    query = query.select("log").where({"log.date": {$gte:queryParams.from}});
-
-   // query = query.where("log.date", queryParams.from);
-  }*/
-  
-  if(queryParams.to !== undefined) {
-  }
-    //query.where({})
-  //query = query.where("log.date", ">", queryParams.to);
-   //query =  User.find( {id:id, "log.date" : {$lt:new Date(queryParams.to)}});
- // let to = new Intl.DateTimeFormat('sv-SE').format(new Date(queryParams.to));
-  let from = new Intl.DateTimeFormat('sv-SE').format(new Date(queryParams.from));
-
- //return query.select("log").where({"log.date": {$lte: "2024-03-07"}});
- //ObjectId
- /*
-ListModel.aggregate(
-    { $match: {_id: ObjectId("57e6bcab6b383120f0395aed")}},
-    { $unwind: '$recipients'},
-    { $match: {'recipients.status':1}})
- */
- /*return User.aggregate({$match: { $expr : { $eq: [ '$_id' , { $toObjectId: id } ]  } }},
- {$unwind: "$log"},{$match:{"log.date":{$gte: from}}});*/
-
- 
-
-  
-  /*
-  if(queryParams.limit !== undefined) {
-  //  query = query.where("count", queryParams.limit);
-   console.log(`use of limit param: ${queryParams.limit}`);
-   query = query.select("log.description")
-  }*/
-  //return query;
-  // return query.select("log").where({"log.date": {$gte: new Date(2024,2,13)}});
- // return query.select("username").select("count").select("_id").select("log.description").select("log.duration").select("log.date");
- 
-  
-}
 
