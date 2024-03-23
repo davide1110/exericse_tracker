@@ -52,3 +52,21 @@ input {
     outline: none;
     text-align: center;
 }
+.log-info {
+    border: 3px solid white;
+    border-radius: 10px;
+    margin-top:5px;
+}
+.log-info > form {
+    text-align: center;   
+}
+
+.log-info > form > input {
+    display: block;
+    align-content: center;
+    margin: 4px auto;
+    padding: 5px;
+}
+.log-info > form > button {
+    margin-top: 5px;
+}

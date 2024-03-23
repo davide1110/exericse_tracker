@@ -27,7 +27,6 @@ app.post('/api/users', (req, res) => {
   const user = new User({ username: username, count: 0,logs: [] });
   User.create(user)
     .then(savedUser => {
-      console.log(`New user created ${savedUser}`);
       res.json({ username: savedUser.username, _id: savedUser._id });
     })
     .catch(error => {
@@ -84,17 +83,14 @@ app.get('/api/users/:id/logs', (req, res) => {
       res.json({error: `No user found with id ${id}`});
       return;
     }
-    console.log(`found user : ${user}`);
     if(user.log !== undefined && user.log.length > 0) {
       
       let logs = filterLogsByParams(user.log, req.query);
-      logs = formatLogsDate(logs);
-    
-      console.log("logs:" + logs);
+      logs = formatLogsDate(logs);    
+      console.log(`logs: ${logs}`);
       user.log = logs;
       user.count = logs.length;
     }
-    //use user.logs.length to return count
     res.json( user);
   }).catch(error => {
     res.json({ error: error });
@@ -104,20 +100,18 @@ app.get('/api/users/:id/logs', (req, res) => {
 
 
 function filterLogsByParams(logs, queryParams) {
-  if(queryParams.limit !== undefined) {
-    console.log('use of limit' + queryParams.limit);
+  
+  if(queryParams.limit !== undefined && queryParams.limit !== "") {
+    console.log(`use of limit: ${queryParams.limit}`);
    logs = logs.slice(logs.length - parseInt(queryParams.limit));
-   console.log(logs);
   }
-  if(queryParams.to !== undefined) {
-    console.log('use of to' + queryParams.to);
+  if(queryParams.to !== undefined && queryParams.to !== "") {
+    console.log(`use of to: ${queryParams.to}`);
    logs = logs.filter(log => new Date(log.date) <= new Date(queryParams.to))
-   console.log(logs);
   }
-  if(queryParams.from !== undefined) {
-    console.log('use of from' + queryParams.from);
-    logs = logs.filter(log => new Date(log.date) >= new Date(queryParams.from))
-    console.log(logs);
+  if(queryParams.from !== undefined && queryParams.from !== "") {
+    console.log(`use of from : ${queryParams.from}`);
+    logs = logs.filter(log => new Date(log.date) >= new Date(queryParams.from));
   }
   return logs;
 
@@ -128,30 +122,6 @@ function formatLogsDate(logs) {
     el.date = new Date(el.date).toDateString();
   })
   return logs;
-}
-app.get('/api/users/logs', (req, res) => {
-//  const id = req.params.id.toString();
-  
-  User.find().select("log.description").exec().then(logs => {
-    console.log("looooogs: " + logs);
-    if(logs.length === 0) {
-      res.json({error: `No logs available`});
-      return;
-    }
-  
-      
-   //   let logs = filterLogsByParams(logs, req.query);
-      //logs = formatLogsDate(logs);
-    
-      console.log("logs:" + logs[0]);
-   
-    
-    //use user.logs.length to return count
-    res.render("log", {logs});
-  }).catch(error => {
-    res.json({ error: error });
-  });
-});
-//TODO: TABELLA con dati principali
-//TODO: Dettaglio con i logs
+};
+
 
